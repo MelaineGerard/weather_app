@@ -12,6 +12,7 @@
   "dependencies": {
     "@capacitor/android": "^4.6.1",
     "@capacitor/core": "^4.6.1",
+    "@capacitor/geolocation": "^4.1.0",
     "flowbite": "^1.6.0",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
