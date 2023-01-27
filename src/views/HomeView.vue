@@ -8,7 +8,7 @@ export default defineComponent({
   },
   data() {
     return {
-      temperature: null as number|null,
+      temperature: null as number | null,
       city: ["Chargement..."] as string[],
       weatherImage: "/images/loading.gif",
     }
@@ -21,7 +21,7 @@ export default defineComponent({
       const cityData = await this.getCityData(coordinates);
       this.city = [];
       this.city.push(cityData.city ?? city.split(',')[0]);
-      if(cityData.country) {
+      if (cityData.country) {
         this.city.push(cityData.country);
       }
       const currentWeather = finalRes.current_weather;
@@ -32,23 +32,23 @@ export default defineComponent({
     async updateImage(weatherCode: number) {
       switch (weatherCode) {
         case 0:
-          this.weatherImage = "/images/soleil.png";
+          this.weatherImage = "/images/sunny.svg";
           break;
         case 1:
         case 2:
         case 3:
-          this.weatherImage = "/images/nuage.png";
+          this.weatherImage = "/images/cloudy.svg";
           break;
         case 45:
         case 48:
-          this.weatherImage = "/images/fog.png";
+          this.weatherImage = "/images/foggy.svg";
           break;
         case 51:
         case 53:
         case 55:
         case 56:
         case 57:
-          this.weatherImage = "https://cdn-icons-png.flaticon.com/512/1182/1182983.png?w=740&t=st=1673012233~exp=1673012833~hmac=efe9b4857f53c1ae70926232207b4880cb4dec5860a205404c92fc3d3a602e76";
+          this.weatherImage = "/images/umbrella.svg";
           break;
         case 61:
         case 63:
@@ -60,18 +60,18 @@ export default defineComponent({
         case 82:
         case 85:
         case 86:
-          this.weatherImage = "https://citeradio.fr/wd/wp-content/uploads/2022/04/Fichier-1-300x267.png";
+          this.weatherImage = "/images/rainy.svg";
           break;
         case 71:
         case 73:
         case 75:
         case 77:
-          this.weatherImage = "https://img.freepik.com/icones-gratuites/il-neige_318-269780.jpg?w=2000";
+          this.weatherImage = "/images/snowflake.svg";
           break;
         case 95:
         case 96:
         case 99:
-          this.weatherImage = "https://www.meteobelgique.be/staticfiles/images/picto/v2/bc/day/thundercover.png";
+          this.weatherImage = "/images/lightning.svg";
           break;
       }
     },
@@ -171,48 +171,53 @@ export default defineComponent({
 
 <template>
   <div class="bg-blue-500 h-screen text-white text-center">
-    <div class="flex items-center justify-center h-screen flex-col">
-      <div class="flex">
-        <router-link to="/" class="mr-4">
-          <button
-              class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+    <div class="flex flex-col">
+      <div class="flex justify-center">
+        <div class="rounded-md shadow-sm mt-4 mb-4">
+          <router-link to="/"
+                       class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
             Accueil
-          </button>
-        </router-link>
-        <router-link to="/cities">
-          <button
-              class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+          </router-link>
+          <router-link to="/cities"
+                       class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
             Villes
-          </button>
-        </router-link>
-      </div>
-      <div class="relative flex mb-4">
-        <div class="relative w-64">
-          <input v-on:input="autocomplete()" type="search" id="search-bar"
-                 class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-r-lg border-l-gray-50 border-l-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-l-gray-700  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500 rounded-l-lg"
-                 placeholder="Rennes, Paris..." required>
-          <button v-on:click="updateCity()" type="button" id="search-button"
-                  class="absolute top-0 right-0 p-2.5 text-sm font-medium text-white bg-blue-700 rounded-r-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-            <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                 xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            <span class="sr-only">Search</span>
-          </button>
-          <div class="absolute bg-gray-50 rounded-md shadow py-2 w-full text-gray-900 hidden" id="search-suggestions">
-            <ul class="list-reset" id="search-list-suggestions">
-              <li class="py-2 px-4 hover:bg-gray-200 cursor-pointer">Suggestion 1</li>
-              <li class="py-2 px-4 hover:bg-gray-200 cursor-pointer">Suggestion 2</li>
-              <li class="py-2 px-4 hover:bg-gray-200 cursor-pointer">Suggestion 3</li>
-            </ul>
-          </div>
+          </router-link>
+          <router-link to="/about"
+                       class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white">
+            A Propos
+          </router-link>
         </div>
       </div>
-      <img :src="weatherImage" alt="Picto type météo" class="h-48 w-48">
-      <div class="text-center text-6xl mt-8 font-semibold mb-4 w-64" v-if="temperature != null">{{ temperature }} °C</div>
-      <div class="text-center text-xl w-64">
-        {{ city.join(', ') }}
+      <div class="flex items-center justify-center flex-col">
+        <div class="relative flex mb-4">
+          <div class="relative w-64">
+            <input v-on:input="autocomplete()" type="search" id="search-bar"
+                   class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-r-lg border-l-gray-50 border-l-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-l-gray-700  dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500 rounded-l-lg"
+                   placeholder="Rennes, Paris..." required>
+            <button v-on:click="updateCity()" type="button" id="search-button"
+                    class="absolute top-0 right-0 p-2.5 text-sm font-medium text-white bg-blue-700 rounded-r-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+              <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                   xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <span class="sr-only">Search</span>
+            </button>
+            <div class="absolute bg-gray-50 rounded-md shadow py-2 w-full text-gray-900 hidden" id="search-suggestions">
+              <ul class="list-reset" id="search-list-suggestions">
+                <li class="py-2 px-4 hover:bg-gray-200 cursor-pointer">Suggestion 1</li>
+                <li class="py-2 px-4 hover:bg-gray-200 cursor-pointer">Suggestion 2</li>
+                <li class="py-2 px-4 hover:bg-gray-200 cursor-pointer">Suggestion 3</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <img :src="weatherImage" alt="Picto type météo" class="h-48 w-48">
+        <div class="text-center text-6xl mt-8 font-semibold mb-4 w-64" v-if="temperature != null">{{ temperature }} °C
+        </div>
+        <div class="text-center text-xl w-64">
+          {{ city.join(', ') }}
+        </div>
       </div>
     </div>
   </div>
