@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import CitiesView from '../views/CitiesView.vue'
 import AboutView from '../views/AboutView.vue'
@@ -10,7 +10,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      props: route => ({ cityProps: route.query.city })
+      props: route => ({cityProps: route.query.city})
     },
     {
       path: '/cities',

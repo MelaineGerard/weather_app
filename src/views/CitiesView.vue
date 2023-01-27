@@ -10,6 +10,9 @@ export default defineComponent({
     }
   },
   methods: {
+    /**
+     *
+     */
     async updateCity() {
       const searchBar: HTMLInputElement | null = <HTMLInputElement>document.getElementById('search-bar');
       const city: string = searchBar!.value;
@@ -19,6 +22,9 @@ export default defineComponent({
         localStorage.setItem("cities", JSON.stringify(this.cities));
       }
     },
+    /**
+     *
+     */
     async autocomplete() {
       const searchSuggestions: HTMLElement | null = <HTMLInputElement>document.getElementById('search-suggestions');
       const searchListSuggestions: HTMLElement | null = document.getElementById('search-list-suggestions');
@@ -56,6 +62,10 @@ export default defineComponent({
 
 
     },
+    /**
+     *
+     * @param coordinates
+     */
     async getCityData(coordinates: { latitude: number, longitude: number }) {
       const cityRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&format=json`);
       const cityJson = await cityRes.json();
@@ -65,6 +75,10 @@ export default defineComponent({
         city: cityJson.address.city
       }
     },
+    /**
+     *
+     * @param city
+     */
     async getCitiesList(city: string): Promise<any[] | null> {
 
       const url = `https://geocoding-api.open-meteo.com/v1/search?name=${city}&language=fr`
@@ -72,6 +86,11 @@ export default defineComponent({
       const finalRes = await res.json();
       return finalRes.results ?? null;
     },
+    /**
+     *
+     * @param city
+     * @param event
+     */
     async removeCity(city: string, event: Event | null = null) {
       if (event !== null) {
         event.preventDefault();
@@ -82,6 +101,10 @@ export default defineComponent({
       }
       localStorage.setItem("cities", JSON.stringify(this.cities));
     },
+    /**
+     *
+     * @param city
+     */
     async goToHome(city: string) {
 
       this.$router.push({path: '/', replace: false, query: {city: city}})
@@ -94,7 +117,7 @@ export default defineComponent({
   <div class="bg-blue-500 h-screen text-white text-center">
     <div class="flex flex-col">
       <div class="flex justify-center">
-        <Navbar />
+        <Navbar/>
       </div>
       <div class="flex items-center justify-center flex-col">
         <div class="relative flex mb-4">
@@ -123,11 +146,11 @@ export default defineComponent({
         </div>
 
         <div
-            class="w-64 text-sm font-medium text-gray-900 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white border-gray-200 border-t border-x"
-            v-if="cities.length > 0">
+          class="w-64 text-sm font-medium text-gray-900 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white border-gray-200 border-t border-x"
+          v-if="cities.length > 0">
           <div
-              class="block w-full h-auto border-gray-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white border-b"
-              v-for="city in cities">
+            class="block w-full h-auto border-gray-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white border-b"
+            v-for="city in cities">
             <div class=" h-auto flex justify-between">
               <div class=" h-auto px-4 py-2 w-full hover:bg-gray-100 hover:text-blue-700" v-on:click="goToHome(city)">
                 {{ city }}
@@ -138,7 +161,7 @@ export default defineComponent({
                 <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
                      viewBox="0 0 24 24">
                   <path
-                      d="M10,18a1,1,0,0,0,1-1V11a1,1,0,0,0-2,0v6A1,1,0,0,0,10,18ZM20,6H16V5a3,3,0,0,0-3-3H11A3,3,0,0,0,8,5V6H4A1,1,0,0,0,4,8H5V19a3,3,0,0,0,3,3h8a3,3,0,0,0,3-3V8h1a1,1,0,0,0,0-2ZM10,5a1,1,0,0,1,1-1h2a1,1,0,0,1,1,1V6H10Zm7,14a1,1,0,0,1-1,1H8a1,1,0,0,1-1-1V8H17Zm-3-1a1,1,0,0,0,1-1V11a1,1,0,0,0-2,0v6A1,1,0,0,0,14,18Z"/>
+                    d="M10,18a1,1,0,0,0,1-1V11a1,1,0,0,0-2,0v6A1,1,0,0,0,10,18ZM20,6H16V5a3,3,0,0,0-3-3H11A3,3,0,0,0,8,5V6H4A1,1,0,0,0,4,8H5V19a3,3,0,0,0,3,3h8a3,3,0,0,0,3-3V8h1a1,1,0,0,0,0-2ZM10,5a1,1,0,0,1,1-1h2a1,1,0,0,1,1,1V6H10Zm7,14a1,1,0,0,1-1,1H8a1,1,0,0,1-1-1V8H17Zm-3-1a1,1,0,0,0,1-1V11a1,1,0,0,0-2,0v6A1,1,0,0,0,14,18Z"/>
                 </svg>
                 <span class="sr-only">Delete</span>
               </button>

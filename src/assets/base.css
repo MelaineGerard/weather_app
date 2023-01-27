@@ -5,9 +5,9 @@
 @tailwind utilities;
 
 * {
-    font-family: 'Montserrat Alternates', sans-serif;
+  font-family: 'Montserrat Alternates', sans-serif;
 }
 
 body {
-    background-color: rgb(63 131 248);
+  background-color: rgb(63, 131, 248);
 }
