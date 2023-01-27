@@ -8,9 +8,9 @@ export default defineComponent({
   },
   data() {
     return {
-      temperature: 10,
-      city: ['Paris', 'France'] as string[],
-      weatherImage: "/images/soleil.png",
+      temperature: null as number|null,
+      city: ["Chargement..."] as string[],
+      weatherImage: "/images/loading.gif",
     }
   },
   methods: {
@@ -81,9 +81,14 @@ export default defineComponent({
         longitude: 0
       };
       if (withCoordinate) {
-        let coords = (await Geolocation.getCurrentPosition()).coords;
-        coordinates['latitude'] = coords.latitude;
-        coordinates['longitude'] = coords.longitude;
+        try {
+          let coords = (await Geolocation.getCurrentPosition()).coords;
+          coordinates['latitude'] = coords.latitude;
+          coordinates['longitude'] = coords.longitude;
+        } catch (e) {
+          coordinates['latitude'] = 48.858370;
+          coordinates['longitude'] = 2.294481;
+        }
       } else {
         let cities = await this.getCitiesList(city);
         if (cities !== null && cities.length !== 0) {
@@ -205,7 +210,7 @@ export default defineComponent({
         </div>
       </div>
       <img :src="weatherImage" alt="Picto type météo" class="h-48 w-48">
-      <div class="text-center text-6xl mt-8 font-semibold mb-4 w-64">{{ temperature }} °C</div>
+      <div class="text-center text-6xl mt-8 font-semibold mb-4 w-64" v-if="temperature != null">{{ temperature }} °C</div>
       <div class="text-center text-xl w-64">
         {{ city.join(', ') }}
       </div>
