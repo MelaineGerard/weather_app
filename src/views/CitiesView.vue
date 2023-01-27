@@ -1,120 +1,21 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {Geolocation} from '@capacitor/geolocation';
 
 export default defineComponent({
-  props: {
-    cityProps: String
-  },
   data() {
     return {
-      temperature: 10,
-      city: ['Paris', 'France'] as string[],
-      weatherImage: "/images/soleil.png",
+      cities: JSON.parse(localStorage.getItem('cities') ?? '[]') as string[] ?? [] as string[]
     }
   },
   methods: {
-    async getData(withCoordinate: boolean = true, city: string = '') {
-      const coordinates = await this.getCoordinates(withCoordinate, city);
-      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coordinates.latitude}&longitude=${coordinates.longitude}&timezone=Europe/Paris&current_weather=true`);
-      const finalRes = await res.json();
-      const cityData = await this.getCityData(coordinates);
-      this.city = [];
-      this.city.push(cityData.city ?? city.split(',')[0]);
-      if(cityData.country) {
-        this.city.push(cityData.country);
-      }
-      const currentWeather = finalRes.current_weather;
-      this.temperature = currentWeather.temperature;
-      const weatherCode: number = currentWeather.weathercode;
-      await this.updateImage(weatherCode);
-    },
-    async updateImage(weatherCode: number) {
-      switch (weatherCode) {
-        case 0:
-          this.weatherImage = "/images/soleil.png";
-          break;
-        case 1:
-        case 2:
-        case 3:
-          this.weatherImage = "/images/nuage.png";
-          break;
-        case 45:
-        case 48:
-          this.weatherImage = "/images/fog.png";
-          break;
-        case 51:
-        case 53:
-        case 55:
-        case 56:
-        case 57:
-          this.weatherImage = "https://cdn-icons-png.flaticon.com/512/1182/1182983.png?w=740&t=st=1673012233~exp=1673012833~hmac=efe9b4857f53c1ae70926232207b4880cb4dec5860a205404c92fc3d3a602e76";
-          break;
-        case 61:
-        case 63:
-        case 65:
-        case 66:
-        case 67:
-        case 80:
-        case 81:
-        case 82:
-        case 85:
-        case 86:
-          this.weatherImage = "https://citeradio.fr/wd/wp-content/uploads/2022/04/Fichier-1-300x267.png";
-          break;
-        case 71:
-        case 73:
-        case 75:
-        case 77:
-          this.weatherImage = "https://img.freepik.com/icones-gratuites/il-neige_318-269780.jpg?w=2000";
-          break;
-        case 95:
-        case 96:
-        case 99:
-          this.weatherImage = "https://www.meteobelgique.be/staticfiles/images/picto/v2/bc/day/thundercover.png";
-          break;
-      }
-    },
-    async getCoordinates(withCoordinate: boolean = true, city: string = '') {
-      const coordinates = {
-        latitude: 0,
-        longitude: 0
-      };
-      if (withCoordinate) {
-        let coords = (await Geolocation.getCurrentPosition()).coords;
-        coordinates['latitude'] = coords.latitude;
-        coordinates['longitude'] = coords.longitude;
-      } else {
-        let cities = await this.getCitiesList(city);
-        if (cities !== null && cities.length !== 0) {
-          let coords = cities[0];
-          coordinates['latitude'] = coords.latitude;
-          coordinates['longitude'] = coords.longitude;
-        }
-      }
-
-      return coordinates;
-    },
-    async getCityData(coordinates: { latitude: number, longitude: number }) {
-      const cityRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&format=json`);
-      const cityJson = await cityRes.json();
-
-      return {
-        country: cityJson.address.country,
-        city: cityJson.address.city
-      }
-    },
-    async getCitiesList(city: string): Promise<any[] | null> {
-
-      const url = `https://geocoding-api.open-meteo.com/v1/search?name=${city}&language=fr`
-      const res = await fetch(url)
-      const finalRes = await res.json();
-      return finalRes.results ?? null;
-    },
     async updateCity() {
       const searchBar: HTMLInputElement | null = <HTMLInputElement>document.getElementById('search-bar');
       const city: string = searchBar!.value;
-      await this.getData(false, city);
+      if (city.length !== 0) {
+        this.cities.push(city);
+        searchBar.value = '';
+        localStorage.setItem("cities", JSON.stringify(this.cities));
+      }
     },
     async autocomplete() {
       const searchSuggestions: HTMLElement | null = <HTMLInputElement>document.getElementById('search-suggestions');
@@ -153,12 +54,35 @@ export default defineComponent({
 
 
     },
-  },
-  mounted() {
-    if (this.cityProps !== undefined) {
-      this.getData(false, this.cityProps)
-    } else {
-      this.getData()
+    async getCityData(coordinates: { latitude: number, longitude: number }) {
+      const cityRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&format=json`);
+      const cityJson = await cityRes.json();
+
+      return {
+        country: cityJson.address.country,
+        city: cityJson.address.city
+      }
+    },
+    async getCitiesList(city: string): Promise<any[] | null> {
+
+      const url = `https://geocoding-api.open-meteo.com/v1/search?name=${city}&language=fr`
+      const res = await fetch(url)
+      const finalRes = await res.json();
+      return finalRes.results ?? null;
+    },
+    async removeCity(city: string, event: Event | null = null) {
+      if (event !== null) {
+        event.preventDefault();
+      }
+      const index: number = this.cities.indexOf(city, 0);
+      if (index > -1) {
+        this.cities.splice(index, 1);
+      }
+      localStorage.setItem("cities", JSON.stringify(this.cities));
+    },
+    async goToHome(city: string) {
+
+      this.$router.push({path: '/', replace: false, query: {city: city}})
     }
   }
 })
@@ -195,7 +119,8 @@ export default defineComponent({
             </svg>
             <span class="sr-only">Search</span>
           </button>
-          <div class="absolute bg-gray-50 rounded-md shadow py-2 w-full text-gray-900 hidden" id="search-suggestions">
+          <div class="absolute bg-gray-50 rounded-md shadow py-2 w-full text-gray-900 hidden z-10"
+               id="search-suggestions">
             <ul class="list-reset" id="search-list-suggestions">
               <li class="py-2 px-4 hover:bg-gray-200 cursor-pointer">Suggestion 1</li>
               <li class="py-2 px-4 hover:bg-gray-200 cursor-pointer">Suggestion 2</li>
@@ -204,10 +129,19 @@ export default defineComponent({
           </div>
         </div>
       </div>
-      <img :src="weatherImage" alt="Picto type météo" class="h-48 w-48">
-      <div class="text-center text-6xl mt-8 font-semibold mb-4 w-64">{{ temperature }} °C</div>
-      <div class="text-center text-xl w-64">
-        {{ city.join(', ') }}
+
+      <div class="w-64 text-sm font-medium text-gray-900 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white border-gray-200 border-t border-x" v-if="cities.length > 0">
+        <div class="block w-full h-10 border-gray-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white border-b" v-for="city in cities">
+          <div class="h-full flex justify-between">
+            <div class="h-full px-4 py-2 w-full hover:bg-gray-100 hover:text-blue-700" v-on:click="goToHome(city)">
+              {{ city }}
+            </div>
+            <button type="button" class="h-full text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium text-sm p-2.5 text-center inline-flex items-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800" v-on:click="removeCity(city)">
+              <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10,18a1,1,0,0,0,1-1V11a1,1,0,0,0-2,0v6A1,1,0,0,0,10,18ZM20,6H16V5a3,3,0,0,0-3-3H11A3,3,0,0,0,8,5V6H4A1,1,0,0,0,4,8H5V19a3,3,0,0,0,3,3h8a3,3,0,0,0,3-3V8h1a1,1,0,0,0,0-2ZM10,5a1,1,0,0,1,1-1h2a1,1,0,0,1,1,1V6H10Zm7,14a1,1,0,0,1-1,1H8a1,1,0,0,1-1-1V8H17Zm-3-1a1,1,0,0,0,1-1V11a1,1,0,0,0-2,0v6A1,1,0,0,0,14,18Z"/></svg>
+              <span class="sr-only">Delete</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
